@@ -6,12 +6,44 @@
 </head>
 
 <body>
-  <h1>Willkommen auf der Website</h1>
+  <h1>Willkommen auf der Website der Johannes Spielgeldbank</h1>
   
   <h2>Über die Bank</h2>
-  <p>Hier kann noch etwas stehen.</p>
+  <p>Die offizielle Website der Johannes Spielgeldbank</p>
   
   <h2>Kontakt</h2>
-  <p>Email: beispiel@email.de</p>
+  <p>nur persönlich</p>
+
+  <h2>Konto Login</h2>
+  <input type="text" id="eingabe" placeholder="Name eingeben">
+  <button onclick="pruefen()">Bestätigen</button>
+
+<script>
+function pruefen() {
+  if (document.getElementById("eingabe").value === "Jojo") {
+    window.location.href = "konto_jojo.html";
+  }
+  else {
+    alert("Kontoname nicht gefunden. Bitte versuchen Sie es erneut.");
+  }
+}
+
+document.getElementById("eingabe").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    pruefen();
+  }
+});
+</script>
+
+
+<script>
+function meineFunktion() {
+  window.location.href = "konto_jojo.html";
+}
+</script>
+
+</body>
+</html>
 </body>
 </html>
