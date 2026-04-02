@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Konto</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #999; padding: 0.5rem; text-align: left; }
+    td.negative { color: #c00; }
+    th { background: #f0f0f0; }
+    .error { color: #900; }
+    .notice { margin-top: 1rem; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Kontoübersicht</h1>
+
+  <p id="status"></p>
+  <div id="table-container"></div>
+  <p class="notice">Kontostand: <strong><span id="sum-value"></span></strong></p>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function formatDate(value) {
+      const parts = value.split('.').map(part => part.trim());
+      if (parts.length !== 3) return value;
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const year = parseInt(parts[2], 10);
+      if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return value;
+      const paddedDay = String(day).padStart(2, '0');
+      const paddedMonth = String(month).padStart(2, '0');
+      return `${paddedDay}.${paddedMonth}.${year}`;
+    }
+
+    async function loadAccount() {
+      const konto = getQueryParam('konto');
+      const status = document.getElementById('status');
+      const container = document.getElementById('table-container');
+      const sumValue = document.getElementById('sum-value');
+      status.textContent = '';
+      status.className = '';
+      container.innerHTML = '';
+      sumValue.textContent = '';
+
+      if (!konto) {
+        status.textContent = 'Bitte rufe diese Seite mit einem Konto-Namen auf, z. B. ?konto=jojo';
+        status.className = 'error';
+        return;
+      }
+
+      const csvFile = `konto_${konto}.csv`;
+      try {
+        const response = await fetch(csvFile);
+        if (!response.ok) throw new Error('Datei nicht gefunden: ' + csvFile);
+        const text = await response.text();
+
+        const rows = text.trim().split('\n').map(line => line.split(','));
+        if (rows.length < 2) {
+          status.textContent = 'Die CSV-Datei enthält keine Daten.';
+          status.className = 'error';
+          return;
+        }
+
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        rows[0].forEach(cell => {
+          const th = document.createElement('th');
+          th.textContent = cell;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        let sum = 0;
+
+        rows.slice(1).forEach(row => {
+          const tr = document.createElement('tr');
+          row.forEach((cell, index) => {
+            const raw = cell.trim();
+            const td = document.createElement('td');
+            if (index === 0) {
+              td.textContent = formatDate(raw);
+            } else if (index === 1) {
+              const value = parseFloat(raw.replace(',', '.'));
+              if (!isNaN(value)) {
+                td.textContent = value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                if (value < 0) td.className = 'negative';
+                sum += value;
+              } else {
+                td.textContent = raw;
+              }
+            } else {
+              td.textContent = raw;
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        container.appendChild(table);
+        sumValue.textContent = sum.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      } catch (err) {
+        status.textContent = 'Fehler: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAccount);
+  </script>
+</body>
+</html>
