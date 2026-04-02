@@ -25,6 +25,7 @@
 
   <script>
     const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
+    const adminPassword = "geheim";
 
     function formatNumber(value) {
       return value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -35,6 +36,12 @@
     }
 
     async function loadAdmin() {
+      const enteredPassword = prompt('Admin-Passwort eingeben:');
+      if (enteredPassword !== adminPassword) {
+        alert('Zugriff verweigert. Falsches Passwort.');
+        window.location.href = 'index.html';
+        return;
+      }
       const status = document.getElementById('status');
       const container = document.getElementById('table-container');
       status.textContent = '';
