@@ -29,7 +29,7 @@
       container.innerHTML = '';
 
       try {
-        const response = await fetch('data.csv');
+        const response = await fetch('konto_jojo.csv');
         if (!response.ok) throw new Error('Datei nicht gefunden: ' + response.status);
         const text = await response.text();
         const rows = text.trim().split('\n').map(line => line.split(','));
