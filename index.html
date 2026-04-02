@@ -21,7 +21,7 @@
   <p id="konto-status"></p>
 
 <script>
-const validKonten = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
+const validKonten = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk", "admin"];
 
 function openKonto() {
   const konto = document.getElementById("kontoName").value.trim().toLowerCase();
@@ -35,7 +35,11 @@ function openKonto() {
     return;
   }
   status.textContent = "";
-  window.location.href = "konto.html?konto=" + encodeURIComponent(konto);
+  if (konto === "admin") {
+    window.location.href = "admin.html";
+  } else {
+    window.location.href = "konto.html?konto=" + encodeURIComponent(konto);
+  }
 }
 
 document.getElementById("kontoOpen").addEventListener("click", openKonto);
