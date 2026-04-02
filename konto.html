@@ -12,6 +12,8 @@
     th { background: #f0f0f0; }
     .error { color: #900; }
     .notice { margin-top: 1rem; color: #555; }
+    .back-button { display: inline-block; margin-top: 2rem; padding: 0.75rem 1.2rem; background: #007acc; color: #fff; border: none; border-radius: 4px; text-decoration: none; cursor: pointer; }
+    .back-button:hover { background: #005fa3; }
   </style>
 </head>
 <body>
@@ -20,6 +22,7 @@
   <p id="status"></p>
   <div id="table-container"></div>
   <p class="notice">Kontostand: <strong><span id="sum-value"></span></strong></p>
+  <button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
 
   <script>
     function getQueryParam(name) {
@@ -50,11 +53,12 @@
       sumValue.textContent = '';
 
       if (!konto) {
-        status.textContent = 'Bitte rufe diese Seite mit einem Konto-Namen auf, z. B. ?konto=jojo';
+        status.textContent = 'Bitte rufe diese Seite mit einem Konto-Namen auf, ?konto="KontoName"';
         status.className = 'error';
         return;
       }
 
+      document.title = 'Konto - ' + konto;
       const csvFile = `konto_${konto}.csv`;
       try {
         const response = await fetch(csvFile);

@@ -2,11 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Website der JSB</title>
+  <title>JSB</title>
 </head>
 
 <body>
-  <h1>Willkommen auf der Website der Johannes Spielgeldbank</h1>
+  <h1>Willkommen auf der Website der JSB</h1>
   
   <p>Die offizielle Website der Johannes Spielgeldbank</p>
   
@@ -21,13 +21,20 @@
   <p id="konto-status"></p>
 
 <script>
+const validKonten = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
+
 function openKonto() {
-  const konto = document.getElementById("kontoName").value.trim();
+  const konto = document.getElementById("kontoName").value.trim().toLowerCase();
   const status = document.getElementById("konto-status");
   if (!konto) {
     status.textContent = "Bitte einen Konto-Namen eingeben.";
     return;
   }
+  if (!validKonten.includes(konto)) {
+    status.textContent = "Konto nicht gefunden. Bitte überprüfe den Namen.";
+    return;
+  }
+  status.textContent = "";
   window.location.href = "konto.html?konto=" + encodeURIComponent(konto);
 }
 
