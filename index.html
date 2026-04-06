@@ -21,47 +21,6 @@
   <p id="konto-status"></p>
 
 
-<!--
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyA-i3qMv2dZbRloTsWM7FrrR8eR40Mx5vY",
-    authDomain: "jsb-firestore.firebaseapp.com",
-    projectId: "jsb-firestore",
-    storageBucket: "jsb-firestore.firebasestorage.app",
-    messagingSenderId: "611249259489",
-    appId: "1:611249259489:web:86afa036214d0b897e08a0",
-    measurementId: "G-NX0KCSRXTT"
-  };
-
-  // Firebase initialisieren
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
-
-<script>
-async function uploadCSV() {
-  const response = await fetch('konto_jojo.csv');
-  const text = await response.text();
-  const rows = text.split('\n');
-  const headers = rows.shift().split(',');
-
-  for (const row of rows) {
-    const values = row.split(',');
-    const docData = {};
-    headers.forEach((h,i) => docData[h] = values[i]);
-    await db.collection("users").add(docData);
-  }
-  console.log("Upload abgeschlossen");
-}
-
-uploadCSV();
-</script>
--->
 
 
 <script>
