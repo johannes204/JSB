@@ -20,8 +20,54 @@
   <button id="kontoOpen">Login</button>
   <p id="konto-status"></p>
 
+<!--
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+  // Supabase-Client initialisieren
+  const supabaseUrl = "https://<project-id>.supabase.co"; // deine Projekt-ID
+  const supabaseKey = "<anon-public-key>"; // Public Anon Key
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+  // Objekt zum Speichern aller CSV-Daten
+  const allCSVData = {};
+
+  async function loadAllCSVs() {
+    // 1. Liste aller Dateien im Bucket abrufen
+    const { data: files, error } = await supabase.storage.from('konten_csv').list();
+    if (error) {
+      console.error("Fehler beim Laden der Dateiliste:", error);
+      return;
+    }
+    if (!files || files.length === 0) {
+      console.warn("Keine CSV-Dateien gefunden.");
+      return;
+    }
+
+    // 2. Jede CSV laden
+    for (const file of files) {
+      const csvUrl = `https://<project-id>.supabase.co/storage/v1/object/public/konten_csv/${file.name}`;
+      try {
+        const response = await fetch(csvUrl);
+        if (!response.ok) throw new Error('Datei nicht gefunden: ' + file.name);
+        const text = await response.text();
+
+        // CSV in Array parsen (Zeilen und Spalten)
+        const rows = text.trim().split('\n').map(line => line.split(','));
+        allCSVData[file.name] = rows; // speichern nach Dateiname
+
+      } catch (err) {
+        console.error("Fehler beim Laden von", file.name, err);
+      }
+    }
+
+    console.log("Alle CSVs geladen:", allCSVData);
+    // allCSVData[fileName] enthält jetzt die CSV-Daten als Array
+  }
+
+  document.addEventListener('DOMContentLoaded', loadAllCSVs);
+</script>
+-->
 
 <script>
 const validKonten = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk", "admin"];
