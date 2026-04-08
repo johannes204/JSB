@@ -22,6 +22,7 @@
 <button onclick="loadCSV()">Laden</button>
 <button onclick="addRow()">Neue Zeile</button>
 <button onclick="uploadCSV()">Speichern</button>
+<button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
 
 <div id="table"></div>
 
@@ -30,6 +31,14 @@ const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
 const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
 const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
 const ADMIN_PASSWORD = "geheim";
+
+const jetzt = new Date(); // aktuelles Datum und Uhrzeit
+
+// Formatierung als z. B. "TT.MM.JJJJ"
+const tag = String(jetzt.getDate()).padStart(2, '0');
+const monat = String(jetzt.getMonth() + 1).padStart(2, '0'); // Monate 0–11
+const jahr = jetzt.getFullYear();
+const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
 let data = [];
 
@@ -108,6 +117,7 @@ function addRow() {
     return;
   }
   const newRow = data[0].map(() => ""); // gleiche Anzahl an Spalten wie Header
+  newRow[0] = aktuellesDatum; // erstes Feld mit aktuellem Datum füllen
   data.push(newRow);
   render();
 }
