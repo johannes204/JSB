@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Bearbeiten</title>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    td, th { border: 1px solid #999; padding: 0.5rem; }
+    input { width: 100%; border: none; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+
+<h1>Admin – Bearbeiten</h1>
+
+<select id="konto">
+  <option value="">Konto wählen</option>
+</select>
+
+<button onclick="loadCSV()">Laden</button>
+<button onclick="addRow()">Neue Zeile</button>
+<button onclick="uploadCSV()">Speichern</button>
+
+<div id="table"></div>
+
+<script>
+const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
+const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
+const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
+const ADMIN_PASSWORD = "geheim";
+
+let data = [];
+
+// Passwortabfrage
+const enteredPassword = prompt("Admin-Passwort eingeben:");
+if (enteredPassword !== ADMIN_PASSWORD) {
+  alert("Zugriff verweigert. Falsches Passwort.");
+  document.body.innerHTML = "<h2>Zugriff verweigert</h2>";
+  throw new Error("Falsches Passwort");
+}
+
+// Dropdown füllen
+const select = document.getElementById("konto");
+accounts.forEach(a => {
+  const opt = document.createElement("option");
+  opt.value = a;
+  opt.textContent = a;
+  select.appendChild(opt);
+});
+
+async function loadCSV() {
+  const konto = select.value;
+  if (!konto) return alert("Konto wählen");
+
+  const res = await fetch(baseUrl + "konto_" + konto + ".csv", {
+    headers: {
+      "apikey": API_KEY,
+      "Authorization": "Bearer " + API_KEY
+    }
+  });
+
+  if (!res.ok) {
+    alert("Fehler beim Laden der CSV-Datei");
+    console.error(await res.text());
+    return;
+  }
+
+  const text = await res.text();
+  data = text.trim().split("\n").map(r => r.split(","));
+  render();
+}
+
+function render() {
+  const div = document.getElementById("table");
+  div.innerHTML = "";
+
+  const table = document.createElement("table");
+
+  data.forEach((row, i) => {
+    const tr = document.createElement("tr");
+
+    row.forEach((cell, j) => {
+      const td = document.createElement(i === 0 ? "th" : "td");
+
+      const input = document.createElement("input");
+      input.value = cell;
+
+      input.oninput = (e) => {
+        data[i][j] = e.target.value;
+      };
+
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+
+    table.appendChild(tr);
+  });
+
+  div.appendChild(table);
+}
+
+// Neue leere Zeile hinzufügen
+function addRow() {
+  if (data.length === 0) {
+    alert("Bitte zuerst eine CSV laden");
+    return;
+  }
+  const newRow = data[0].map(() => ""); // gleiche Anzahl an Spalten wie Header
+  data.push(newRow);
+  render();
+}
+
+async function uploadCSV() {
+  const konto = select.value;
+  if (!konto) return;
+
+  const csv = data.map(r => r.join(",")).join("\n");
+
+  const res = await fetch(baseUrl + "konto_" + konto + ".csv", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "text/csv",
+      "apikey": API_KEY,
+      "Authorization": "Bearer " + API_KEY
+    },
+    body: csv
+  });
+
+  if (res.ok) {
+    alert("Gespeichert ✅");
+  } else {
+    alert("Fehler ❌");
+    console.error(await res.text());
+  }
+}
+</script>
+
+</body>
+</html>

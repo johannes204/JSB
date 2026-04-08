@@ -1,2 +1,4 @@
 Datum,Betrag,Buchung,Zinssatz
 1.4.2026,12555.05,Kontostand Stichtag,8
+2.4.2026,500,Einzahlung (nur Test),
+4.4.2026,-200,Abhebung (nur Test),
