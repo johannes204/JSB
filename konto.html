@@ -42,8 +42,8 @@
 <button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
 
 <div style="margin-top: 5rem;"></div>
-<button onclick="gutschriftQuartalalleKonten()">Zinsen gutschreiben</button> <!-- wieder herausnehmen! -->
-<p class="notice">Hinweis: Die Zinsen werden quartalsweise, aber erst nach Knopfdruck gutschrieben. Gerne betätigen, wenn die Zinsen noch nicht abgerechnet wurden, diese werden dann jeweils für das letzte noch nicht abgerechnete Quartal berechnet.</p>
+<button id="zinsButton" style="display:none;" onclick="gutschriftQuartalalleKonten()">Zinsen gutschreiben</button> <!-- wieder herausnehmen! -->
+<p id="zinsHinweistext" style="display:none;" class="notice">Hinweis: Die Zinsen werden quartalsweise, aber erst nach Knopfdruck gutschrieben. Gerne betätigen, wenn die Zinsen noch nicht abgerechnet wurden, diese werden dann jeweils für das letzte noch nicht abgerechnete Quartal berechnet.</p>
 
 <script>
 const accounts = ["jojo","elisa","3153234","polizei","papa","tssk"];
@@ -62,6 +62,10 @@ const vonKonto = getQueryParam('konto');
 if (!vonKonto || !accounts.includes(vonKonto)) {
   alert("Ungültiges Konto in der URL.");
   throw new Error("Ungültiges Konto");
+}
+if (vonKonto == "jojo") {
+  document.getElementById("zinsButton").style.display = "inline-block";
+  document.getElementById("zinsHinweistext").style.display = "block";
 }
 
 // Dropdown Empfänger füllen
