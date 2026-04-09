@@ -33,6 +33,8 @@
 </select>
 <label>Betrag (€):</label>
 <input type="number" id="betragInput" step="0.01" />
+<label>Kommentar:</label>
+<input type="string" id="kommentarInput" />
 <button onclick="ueberweisung()">Überweisen</button>
 <p id="ueberweisungsStatus"></p>
 
@@ -182,9 +184,9 @@ async function ueberweisung() {
   const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
   // Absenderkonto (negativer Betrag)
-  dataKonten[vonKonto].push([aktuellesDatum, (-betrag).toString(), `Überweisung an ${nach}`, '']);
+  dataKonten[vonKonto].push([aktuellesDatum, (-betrag).toString(), `Überweisung an ${nach}`+"     "+document.getElementById("kommentarInput").value, '']);
   // Empfängerkonto (positiver Betrag)
-  dataKonten[nach].push([aktuellesDatum, betrag.toString(), `Überweisung von ${vonKonto}`, '']);
+  dataKonten[nach].push([aktuellesDatum, betrag.toString(), `Überweisung von ${vonKonto}` + "     " + document.getElementById("kommentarInput").value, '']);
 
   // CSVs hochladen
   await Promise.all([vonKonto,nach].map(async konto=>{
