@@ -34,7 +34,7 @@
 </select>
 <label>Betrag (€):</label>
 <input type="number" id="betragInput" step="0.01" />
-<label>Kommentar:</label>
+<label>ggf. Kommentar:</label>
 <input type="text" id="kommentarInput" />
 <button onclick="ueberweisung()">Überweisen</button>
 <p id="ueberweisungsStatus"></p>
@@ -290,7 +290,7 @@ function berechneZinseninDatumsbereich(konto, vonDatum, bisDatum) {
   const zinssatz = parseFloat((rows[1][3] || "0").replace(',', '.')) / 100;
   let kontostand = 0;
 
-  // 1️⃣ Kontostand bis zum Quartalsanfang aufsummieren
+  // 1️ Kontostand bis zum Quartalsanfang aufsummieren
   rows.slice(1).forEach(row => {
     const [t,m,j] = row[0].split('.').map(Number);
     const datum = new Date(j, m-1, t);
@@ -299,7 +299,7 @@ function berechneZinseninDatumsbereich(konto, vonDatum, bisDatum) {
     }
   });
 
-  // 2️⃣ Buchungen im Quartal sammeln
+  // 2️ Buchungen im Quartal sammeln
   const buchungen = rows.slice(1)
     .map(row => {
       const [t,m,j] = row[0].split('.').map(Number);
@@ -311,7 +311,7 @@ function berechneZinseninDatumsbereich(konto, vonDatum, bisDatum) {
     .filter(b => b.datum >= vonDatum && b.datum < bisDatum)
     .sort((a,b) => a.datum - b.datum); // aufsteigend nach Datum
 
-  // 3️⃣ Zinsen stufenweise berechnen
+  // 3️ Zinsen stufenweise berechnen
   let zinsen = 0;
   let letzterDatum = new Date(vonDatum);
 
@@ -323,7 +323,7 @@ function berechneZinseninDatumsbereich(konto, vonDatum, bisDatum) {
     letzterDatum = b.datum;
   });
 
-  // 4️⃣ Zinsen bis Quartalsende
+  // 4️ Zinsen bis Quartalsende
   const tageRest = (bisDatum - letzterDatum) / (1000*60*60*24);
   zinsen += kontostand * (Math.pow(1 + zinssatz, tageRest/365) - 1);
 
@@ -352,7 +352,7 @@ async function gutschriftQuartal(zinskonto) {
   vorQuartal.setMonth(quartal.getMonth() - 3);
 
 
-  // 🔒 doppelte Gutschrift verhindern
+  // doppelte Gutschrift verhindern
   if (wurdeSchonGutgeschrieben(konto, datumStr)) {
     alert("Zinsen für dieses Quartal wurden bereits gutgeschrieben.");
     return;
