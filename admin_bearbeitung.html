@@ -34,27 +34,31 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
-const SUPABASE_ANON_KEY = "DEIN_ANON_KEY";
+const SUPABASE_ANON_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   const { data: { user }, error } = await supabaseClient.auth.getUser();
 
   if (error || !user) {
+    // Weiterleitung auf Login-Seite, falls nicht eingeloggt
     window.location.href = "login.html";
     return;
   }
 
-  const ADMIN_ID = "DEINE_USER_ID";
+  const ADMIN_ID = "61614214-ab29-4de9-b27b-a1dc8f1e18f3"; // die Supabase-ID deines Admin-Users
 
   if (user.id !== ADMIN_ID) {
     alert("Kein Zugriff");
-    window.location.href = "konto.html";
+    window.location.href = "konto.html"; // normale Konto-Seite
     return;
   }
 
-  // nur wenn Admin → Seite normal laden
+  // nur wenn Admin → Seite laden
 });
+
+
 const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
 const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
 const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";

@@ -1,49 +1,66 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Login</title>
-  <style>
-    body { font-family: Arial; margin: 2rem; text-align:center; }
-    button { padding: 0.75rem 1.5rem; font-size: 1rem; cursor: pointer; margin-top: 2rem; }
-  </style>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<style>
+  body { font-family: Arial; margin: 2rem; max-width: 400px; }
+  h1 { color: #333; }
+  label { display: block; margin-top: 1rem; }
+  input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+  button { margin-top: 1rem; padding: 0.5rem 1rem; width: 100%; background: #007acc; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #005fa3; }
+  .error { color: red; margin-top: 0.5rem; }
+</style>
 </head>
 <body>
-  <h1>Admin Login</h1>
-  <p>Bitte melde dich an, um fortzufahren.</p>
-  <button id="loginBtn">Login mit GitHub</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
-    const SUPABASE_ANON_KEY = "DEIN_ANON_KEY";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<h1>Admin Login</h1>
 
-    const ADMIN_EMAILS = ["admin1@example.com", "admin2@example.com"]; // nur diese E-Mails haben Zugriff
+<label for="email">E-Mail</label>
+<input type="email" id="email" placeholder="E-Mail" required>
 
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: window.location.origin + '/admin_bearbeiten.html'
-        }
-      });
+<label for="password">Passwort</label>
+<input type="password" id="password" placeholder="Passwort" required>
 
-      if (error) {
-        console.error("Login Fehler:", error.message);
-        alert("Login fehlgeschlagen.");
-      }
-    });
+<button id="loginBtn">Einloggen</button>
+<p class="error" id="errorMsg"></p>
 
-    // Prüfen, ob der User bereits angemeldet ist
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      if (user && ADMIN_EMAILS.includes(user.email)) {
-        // Admin bereits angemeldet → weiterleiten
-        window.location.href = "admin_bearbeiten.html";
-      }
-    })();
-  </script>
+  const loginBtn = document.getElementById("loginBtn");
+  const errorMsg = document.getElementById("errorMsg");
+
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      errorMsg.textContent = "Bitte E-Mail und Passwort eingeben.";
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errorMsg.textContent = "Login fehlgeschlagen: " + error.message;
+      return;
+    }
+
+    const ADMIN_ID = "61614214-ab29-4de9-b27b-a1dc8f1e18f3";
+    if (data.user.id !== ADMIN_ID) {
+      errorMsg.textContent = "Kein Zugriff. Du bist kein Admin.";
+      return;
+    }
+
+    // Erfolgreicher Login → weiterleiten
+    window.location.href = "admin_bearbeitung.html";
+  });
+</script>
+
 </body>
 </html>
