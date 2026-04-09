@@ -63,7 +63,7 @@ if (!vonKonto || !accounts.includes(vonKonto)) {
   alert("Ungültiges Konto in der URL.");
   throw new Error("Ungültiges Konto");
 }
-if (vonKonto == "jojo") {
+if (vonKonto == "jojo" || vonKonto == "tssk") {
   document.getElementById("zinsButton").style.display = "inline-block";
   document.getElementById("zinsHinweistext").style.display = "block";
 }
