@@ -1,184 +1,207 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Konto</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    h1 { color: #333; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    th, td { border: 1px solid #999; padding: 0.5rem; text-align: left; }
-    td.negative { color: #c00; }
-    th { background: #f0f0f0; }
-    .error { color: #900; }
-    .notice { margin-top: 1rem; color: #555; }
-    .back-button {
-      display: inline-block;
-      margin-top: 2rem;
-      padding: 0.75rem 1.2rem;
-      background: #007acc;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .back-button:hover { background: #005fa3; }
-  </style>
+<meta charset="UTF-8">
+<title>Kontoübersicht</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2rem; }
+  h1, h2 { color: #333; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  th, td { border: 1px solid #999; padding: 0.5rem; text-align: left; }
+  td.negative { color: #c00; }
+  th { background: #f0f0f0; }
+  .error { color: #900; }
+  .notice { margin-top: 1rem; color: #555; }
+  .back-button { display: inline-block; margin-top: 2rem; padding: 0.75rem 1.2rem; background: #007acc; color: #fff; border: none; border-radius: 4px; text-decoration: none; cursor: pointer; }
+  .back-button:hover { background: #005fa3; }
+  label { margin-right: 0.5rem; }
+  input[type="number"] { width: 100px; margin-right: 0.5rem; }
+</style>
 </head>
 <body>
-  <h1>Kontoübersicht</h1>
+<h1>Kontoübersicht</h1>
 
-  <p id="status"></p>
-  <p id="interest-rate"></p>
-  <div id="table-container"></div>
-  <p class="notice">Kontostand: <strong><span id="sum-value"></span></strong></p>
-  <button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
+<p id="status"></p>
+<p id="interest-rate"></p>
+<div id="table-container"></div>
+<p class="notice">Kontostand: <strong><span id="sum-value"></span></strong></p>
 
-  <script>
-    const erlaubteKonten = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
-    const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
-    const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
+<h2>Überweisung</h2>
+<label>Nach Konto:</label>
+<select id="nachKonto">
+  <option value="">Konto wählen</option>
+</select>
+<label>Betrag (€):</label>
+<input type="number" id="betragInput" step="0.01" />
+<button onclick="ueberweisung()">Überweisen</button>
+<p id="ueberweisungsStatus"></p>
 
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
+<button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
 
-    function formatDate(value) {
-      const parts = value.split('.').map(part => part.trim());
-      if (parts.length !== 3) return value;
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      const year = parseInt(parts[2], 10);
-      if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return value;
-      const paddedDay = String(day).padStart(2, '0');
-      const paddedMonth = String(month).padStart(2, '0');
-      return `${paddedDay}.${paddedMonth}.${year}`;
-    }
+<script>
+const accounts = ["jojo","elisa","3153234","polizei","papa","tssk"];
+const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
+const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
+const erlaubteKonten = accounts;
 
-    function formatPercent(value) {
-      return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
-    }
+let dataKonten = {}; // alle geladenen CSVs
 
-    async function loadAccount() {
-      const konto = getQueryParam('konto');
-      const status = document.getElementById('status');
-      const container = document.getElementById('table-container');
-      const sumValue = document.getElementById('sum-value');
+// Absenderkonto aus URL
+function getQueryParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+const vonKonto = getQueryParam('konto');
+if (!vonKonto || !accounts.includes(vonKonto)) {
+  alert("Ungültiges Konto in der URL.");
+  throw new Error("Ungültiges Konto");
+}
 
-      status.textContent = '';
-      status.className = '';
-      container.innerHTML = '';
-      sumValue.textContent = '';
-      document.getElementById('interest-rate').textContent = '';
+// Dropdown Empfänger füllen
+const nachSelect = document.getElementById("nachKonto");
+accounts.forEach(a => {
+  if (a !== vonKonto) {
+    const opt = document.createElement("option");
+    opt.value = a;
+    opt.textContent = a;
+    nachSelect.appendChild(opt);
+  }
+});
 
-      if (!konto) {
-        status.textContent = 'Bitte rufe diese Seite mit einem Konto-Namen auf, also mit ?konto=KontoName am Ende der URL.';
-        status.className = 'error';
-        return;
-      }
+// CSVs aller Konten laden
+async function loadAllKonten() {
+  for (const konto of accounts) {
+    const res = await fetch(baseUrl + "konto_" + konto + ".csv", {
+      headers: { "apikey": API_KEY, "Authorization": "Bearer " + API_KEY }
+    });
+    const text = await res.text();
+    dataKonten[konto] = text.trim().split("\n").map(r => r.split(","));
+  }
+}
 
-      if (!erlaubteKonten.includes(konto)) {
-        status.textContent = 'Unbekanntes Konto: ' + konto;
-        status.className = 'error';
-        return;
-      }
+// Formatierung
+function formatDate(value) {
+  const parts = value.split('.').map(p => p.trim());
+  if (parts.length !== 3) return value;
+  const day = String(parseInt(parts[0],10)).padStart(2,'0');
+  const month = String(parseInt(parts[1],10)).padStart(2,'0');
+  const year = parseInt(parts[2],10);
+  return `${day}.${month}.${year}`;
+}
+function formatPercent(value) {
+  return value.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+}
 
-      document.title = 'Konto - ' + konto;
-      const csvFile = `${baseUrl}konto_${konto}.csv`;
+// Konto anzeigen
+function renderAccount() {
+  const konto = vonKonto;
+  const status = document.getElementById('status');
+  const container = document.getElementById('table-container');
+  const sumValue = document.getElementById('sum-value');
 
-      try {
-        const response = await fetch(csvFile, {
-          headers: {
-            "apikey": API_KEY,
-            "Authorization": "Bearer " + API_KEY
-          }
-        });
+  status.textContent = '';
+  container.innerHTML = '';
+  sumValue.textContent = '';
+  document.getElementById('interest-rate').textContent = '';
 
-        if (!response.ok) {
-          throw new Error('Datei nicht gefunden oder keine Berechtigung: ' + csvFile);
-        }
+  if (!dataKonten[konto]) {
+    status.textContent = 'Kontodaten noch nicht geladen.';
+    status.className = 'error';
+    return;
+  }
 
-        const text = await response.text();
-        const rows = text.trim().split('\n').map(line => line.split(','));
+  const rows = dataKonten[konto];
+  if (rows.length < 2) {
+    status.textContent = 'Keine Daten vorhanden.';
+    status.className = 'error';
+    return;
+  }
 
-        if (rows.length < 2) {
-          status.textContent = 'Die CSV-Datei enthält keine Daten.';
-          status.className = 'error';
-          return;
-        }
+  // Zinssatz
+  const rateContent = rows[1][3] || '';
+  if (rateContent) {
+    const rawRate = parseFloat(rateContent.replace(',', '.'));
+    if (!isNaN(rawRate)) document.getElementById('interest-rate').textContent = 'vereinbarter Zinssatz: ' + formatPercent(rawRate) + ' p.a.';
+  }
 
-        const interestRateContent = rows[1] && rows[1][3] ? rows[1][3].trim() : '';
-        if (interestRateContent) {
-          const rawRate = parseFloat(interestRateContent.replace(',', '.'));
-          if (!isNaN(rawRate)) {
-            document.getElementById('interest-rate').textContent =
-              'vereinbarter Zinssatz: ' + formatPercent(rawRate) + ' p.a.';
-          }
-        }
+  // Tabelle
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  rows[0].slice(0,3).forEach(c => { const th=document.createElement('th'); th.textContent=c; headerRow.appendChild(th); });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
 
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+  const tbody = document.createElement('tbody');
+  let sum = 0;
+  rows.slice(1).forEach(row => {
+    const tr = document.createElement('tr');
+    row.slice(0,3).forEach((cell,i)=>{
+      const td = document.createElement('td');
+      if(i===0) td.textContent = formatDate(cell.trim());
+      else if(i===1) {
+        const val = parseFloat(cell.replace(',', '.'));
+        if(!isNaN(val)){
+          td.textContent = val.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+          if(val<0) td.className='negative';
+          sum+=val;
+        } else td.textContent = cell;
+      } else td.textContent = cell;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
 
-        rows[0].slice(0, 3).forEach(cell => {
-          const th = document.createElement('th');
-          th.textContent = cell;
-          headerRow.appendChild(th);
-        });
+  sumValue.textContent = sum.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
+// Überweisung
+async function ueberweisung() {
+  if (!dataKonten[vonKonto]) { alert("Kontodaten noch nicht geladen."); return; }
 
-        const tbody = document.createElement('tbody');
-        let sum = 0;
+  const nach = nachSelect.value;
+  const betrag = parseFloat(document.getElementById("betragInput").value);
+  if (!nach || isNaN(betrag) || betrag <=0) { alert("Bitte Empfänger und gültigen Betrag wählen."); return; }
 
-        rows.slice(1).forEach(row => {
-          const tr = document.createElement('tr');
+  const jetzt = new Date();
+  const tag = String(jetzt.getDate()).padStart(2,'0');
+  const monat = String(jetzt.getMonth()+1).padStart(2,'0');
+  const jahr = jetzt.getFullYear();
+  const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
-          row.slice(0, 3).forEach((cell, index) => {
-            const raw = cell.trim();
-            const td = document.createElement('td');
+  // Absenderkonto (negativer Betrag)
+  dataKonten[vonKonto].push([aktuellesDatum, (-betrag).toString(), `Überweisung an ${nach}`, '']);
+  // Empfängerkonto (positiver Betrag)
+  dataKonten[nach].push([aktuellesDatum, betrag.toString(), `Überweisung von ${vonKonto}`, '']);
 
-            if (index === 0) {
-              td.textContent = formatDate(raw);
-            } else if (index === 1) {
-              const value = parseFloat(raw.replace(',', '.'));
-              if (!isNaN(value)) {
-                td.textContent = value.toLocaleString('de-DE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                });
-                if (value < 0) td.className = 'negative';
-                sum += value;
-              } else {
-                td.textContent = raw;
-              }
-            } else {
-              td.textContent = raw;
-            }
+  // CSVs hochladen
+  await Promise.all([vonKonto,nach].map(async konto=>{
+    const csv = dataKonten[konto].map(r=>r.join(",")).join("\n");
+    const res = await fetch(baseUrl+"konto_"+konto+".csv",{
+      method:"PUT",
+      headers:{
+        "Content-Type":"text/csv",
+        "apikey":API_KEY,
+        "Authorization":"Bearer "+API_KEY
+      },
+      body:csv
+    });
+    if(!res.ok) console.error(await res.text());
+  }));
 
-            tr.appendChild(td);
-          });
+  document.getElementById("ueberweisungsStatus").textContent =
+    `Überweisung von ${betrag.toFixed(2)}€ von ${vonKonto} nach ${nach} erfolgreich!`;
 
-          tbody.appendChild(tr);
-        });
+  renderAccount();
+}
 
-        table.appendChild(tbody);
-        container.appendChild(table);
-
-        sumValue.textContent = sum.toLocaleString('de-DE', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-      } catch (err) {
-        status.textContent = 'Fehler: ' + err.message;
-        status.className = 'error';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', loadAccount);
-  </script>
+// Alles laden beim Start
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await loadAllKonten();
+  renderAccount();
+});
+</script>
 </body>
 </html>

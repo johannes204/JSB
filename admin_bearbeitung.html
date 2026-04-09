@@ -21,6 +21,7 @@
 
 <button onclick="loadCSV()">Laden</button>
 <button onclick="addRow()">Neue Zeile</button>
+<button onclick="deleteLastRow()">Letzte Zeile löschen</button>
 <button onclick="uploadCSV()">Speichern</button>
 <button class="back-button" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
 
@@ -119,6 +120,16 @@ function addRow() {
   const newRow = data[0].map(() => ""); // gleiche Anzahl an Spalten wie Header
   newRow[0] = aktuellesDatum; // erstes Feld mit aktuellem Datum füllen
   data.push(newRow);
+  render();
+}
+
+// Letzte Zeile löschen
+function deleteLastRow() {
+  if (data.length <= 1) {
+    alert("Keine Zeile zum Löschen vorhanden");
+    return;
+  }
+  data.pop();
   render();
 }
 
