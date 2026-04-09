@@ -29,7 +29,7 @@
 
 <div id="table"></div>
 
-
+<button id="logoutBtn">Abmelden</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -58,6 +58,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // nur wenn Admin → Seite laden
 });
 
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.addEventListener("click", async () => {
+  await supabaseClient.auth.signOut(); // Supabase-Session beenden
+  window.location.href = "login.html"; // zurück zur Login-Seite
+});
 
 const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
 const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
