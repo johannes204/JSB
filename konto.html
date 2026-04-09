@@ -156,6 +156,14 @@ function renderAccount() {
 
   sumValue.textContent = sum.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+function getKontostand(konto) {
+  if (!dataKonten[konto]) return 0;
+
+  return dataKonten[konto].slice(1).reduce((sum, row) => {
+    const val = parseFloat((row[1] || "").replace(',', '.'));
+    return !isNaN(val) ? sum + val : sum;
+  }, 0);
+}
 
 // Überweisung
 async function ueberweisung() {
@@ -164,6 +172,8 @@ async function ueberweisung() {
   const nach = nachSelect.value;
   const betrag = parseFloat(document.getElementById("betragInput").value);
   if (!nach || isNaN(betrag) || betrag <=0) { alert("Bitte Empfänger und gültigen Betrag wählen."); return; }
+  if (betrag > getKontostand(vonKonto)) { alert("Ungenügender Kontostand."); return; }
+  if (betrag > 5000) { alert("Überschreitung des maximalen Überweisungsbetrags. Bitte wenden Sie sich an den Kundenservice für Überweisungen ab 5000€."); return; }
 
   const jetzt = new Date();
   const tag = String(jetzt.getDate()).padStart(2,'0');
