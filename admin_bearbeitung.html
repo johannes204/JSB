@@ -29,11 +29,35 @@
 
 <div id="table"></div>
 
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
+const SUPABASE_ANON_KEY = "DEIN_ANON_KEY";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+  if (error || !user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const ADMIN_ID = "DEINE_USER_ID";
+
+  if (user.id !== ADMIN_ID) {
+    alert("Kein Zugriff");
+    window.location.href = "konto.html";
+    return;
+  }
+
+  // nur wenn Admin → Seite normal laden
+});
 const accounts = ["jojo", "elisa", "3153234", "polizei", "papa", "tssk"];
 const baseUrl = "https://wfvnjsuizeegpmktmgen.supabase.co/storage/v1/object/konten_csv/";
 const API_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
-const ADMIN_PASSWORD = "geheim!";
 
 const jetzt = new Date(); // aktuelles Datum und Uhrzeit
 
@@ -44,14 +68,6 @@ const jahr = jetzt.getFullYear();
 const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
 let data = [];
-
-// Passwortabfrage
-const enteredPassword = prompt("Admin-Passwort eingeben:");
-if (enteredPassword !== ADMIN_PASSWORD) {
-  alert("Zugriff verweigert. Falsches Passwort.");
-  document.body.innerHTML = "<h2>Zugriff verweigert</h2>";
-  throw new Error("Falsches Passwort");
-}
 
 // Dropdown füllen
 const select = document.getElementById("konto");
