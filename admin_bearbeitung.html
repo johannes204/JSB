@@ -173,9 +173,12 @@ function deleteLastRow() {
 
 async function uploadCSV() {
   const konto = select.value;
-  if 
   if (!konto) return;
-
+  if (!eingeloggt) {
+    alert("...");
+    location.reload(true);
+    return;
+  }
   const csv = data.map(r => r.join(",")).join("\n");
 
   const res = await fetch(baseUrl + "konto_" + konto + ".csv", {
