@@ -36,6 +36,7 @@
 const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const eingeloggt = 0;
 
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -54,9 +55,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "konto.html"; // normale Konto-Seite
     return;
   }
+  else{
+    eingeloggt = 1;
+  }
 
   // nur wenn Admin → Seite laden
 });
+if (eingeloggt === 0) {
+  location.reload();
+}
 
 const logoutBtn = document.getElementById("logoutBtn");
 
