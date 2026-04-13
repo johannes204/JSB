@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Cache-Control" content="no-store">
   <title>Admin Bearbeiten</title>
   <style>
     body { font-family: Arial; margin: 2rem; }
@@ -40,6 +41,7 @@
 const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const eingeloggt = false
 
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -57,6 +59,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("Kein Zugriff");
     window.location.href = "konto.html"; // normale Konto-Seite
     return;
+  }
+  else {
+    // Admin ist eingeloggt, Seite laden
+    eingeloggt = true;
   }
 
   // nur wenn Admin → Seite laden
@@ -167,6 +173,7 @@ function deleteLastRow() {
 
 async function uploadCSV() {
   const konto = select.value;
+  if 
   if (!konto) return;
 
   const csv = data.map(r => r.join(",")).join("\n");
