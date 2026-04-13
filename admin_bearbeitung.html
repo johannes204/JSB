@@ -89,6 +89,12 @@ const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
 let data = [];
 
+if (!eingeloggt) {
+    alert("Bitte einloggen");
+    location.reload(true);
+    return;
+  }
+
 // Dropdown füllen
 const select = document.getElementById("konto");
 accounts.forEach(a => {
@@ -175,7 +181,7 @@ async function uploadCSV() {
   const konto = select.value;
   if (!konto) return;
   if (!eingeloggt) {
-    alert("...");
+    alert("Nö");
     location.reload(true);
     return;
   }
