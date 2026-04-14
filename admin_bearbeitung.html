@@ -41,7 +41,7 @@
 const SUPABASE_URL = "https://wfvnjsuizeegpmktmgen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_OezveOjxPGaNAX5yTWTEvg_lWIEd4OL";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const eingeloggt = false
+let eingeloggt = false
 
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -88,13 +88,13 @@ const jahr = jetzt.getFullYear();
 const aktuellesDatum = `${tag}.${monat}.${jahr}`;
 
 let data = [];
-
+/*
 if (!eingeloggt) {
     alert("Bitte einloggen");
     location.reload(true);
     return;
   }
-
+*/
 // Dropdown füllen
 const select = document.getElementById("konto");
 accounts.forEach(a => {
